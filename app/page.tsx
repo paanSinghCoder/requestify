@@ -1,47 +1,83 @@
 'use client'
 
+import BodyInput from '@/components/BodyInput'
+import LearnMoreButton from '@/components/LearnMoreButton'
 import Navbar from '@/components/Navbar'
 import QueryParams from '@/components/QueryParams'
 import { QueryParam } from '@/components/QueryParams/QueryParams.types'
 import Tabs from '@/components/Tabs'
 import { TabsType } from '@/components/Tabs/Tabs.types'
-import { useState } from 'react'
+import { createQueryParamString } from '@/helpers'
+import useFetch from '@/hooks/useFetch'
+import { Suspense, useState } from 'react'
+import toast from 'react-hot-toast'
 
 export default function Home() {
 	const [method, setMethod] = useState('GET')
 	const [url, setUrl] = useState('')
 	const [queryParams, setQueryParams] = useState<QueryParam[]>([{ key: '', value: '' }])
 
+	//JSON input
+	const [jsonInput, setJsonInput] = useState<string>('')
+	const [parsedJson, setParsedJson] = useState<any>(null)
+	//JSON input
+
+	const { res, loading, error, call } = useFetch()
+
 	const handleQueryParamsChange = (updatedQueryParams: QueryParam[]) => {
 		setQueryParams(updatedQueryParams)
 	}
 
 	const submit = (e: React.FormEvent) => {
-		e.preventDefault
+		e.preventDefault()
 
-		alert(url)
+		if (!url.trim()) {
+			toast.error('Add a valid URL')
+			return
+		}
+
+		const queryParamsString = createQueryParamString(queryParams)
+
+		call(url + queryParamsString, method)
 	}
 
 	const tabs: TabsType[] = [
 		{
 			id: 0,
 			title: 'Query',
-			component: <QueryParams queryParams={queryParams} setQueryParams={handleQueryParamsChange} />
+			component: (
+				<Suspense fallback={<>Loading...</>}>
+					<QueryParams queryParams={queryParams} setQueryParams={handleQueryParamsChange} />
+				</Suspense>
+			)
 		},
 		{
 			id: 1,
 			title: 'Body',
-			component: <>Body</>
+			component: (
+				<Suspense fallback={<>Loading...</>}>
+					<BodyInput
+						jsonInput={jsonInput}
+						setJsonInput={setJsonInput}
+						parsedJson={parsedJson}
+						setParsedJson={setParsedJson}
+					/>
+				</Suspense>
+			)
 		},
 		{
 			id: 2,
 			title: 'Auth',
-			component: <>Auth</>
+			component: <>Coming soon</>
 		},
 		{
 			id: 3,
 			title: 'Docs',
-			component: <>Docs</>
+			component: (
+				<Suspense fallback={<>Loading...</>}>
+					<LearnMoreButton />
+				</Suspense>
+			)
 		}
 	]
 
@@ -53,7 +89,7 @@ export default function Home() {
 			<div className="grid grid-cols-2 mx-auto border-l border-r border-b rounded-b-md">
 				<div className="w-auto border-r">
 					<form
-						onSubmit={e => submit(e)}
+						onSubmit={submit}
 						className="flex flex-col mx-auto border-b text-center items-center justify-center mt-4 focus:outline-none focus:ring-0 focus:ring-offset-0">
 						<div className="py-2 w-full flex items-center justify-center px-4">
 							<select
@@ -73,7 +109,7 @@ export default function Home() {
 								placeholder="https://"
 							/>
 							<button
-								disabled={false}
+								disabled={loading}
 								type="submit"
 								className="py-3 px-5 bg-blue-700 hover:bg-blue-800 rounded-md my-3 ml-3 text-white text-xs font-bold disabled:bg-gray-400">
 								SEND
@@ -82,7 +118,17 @@ export default function Home() {
 						<Tabs tabs={tabs} />
 					</form>
 				</div>
-				<div className="w-auto "></div>
+				<div className="overflow-auto max-h-[650px]">
+					<pre className="w-auto">
+						{res ? (
+							JSON.stringify(res, undefined, 2)
+						) : (
+							<div className="h-full w-full flex items-center justify-center">
+								Start by adding an API URL and hitting Enter
+							</div>
+						)}
+					</pre>
+				</div>
 			</div>
 		</main>
 	)

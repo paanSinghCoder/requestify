@@ -13,8 +13,11 @@ const QueryParams: React.FC<QueryParamsProps> = ({ queryParams, setQueryParams }
 	}
 
 	const handleQueryParamChange = (index: number, field: keyof QueryParam, value: string) => {
+		// Remove spaces from the input value
+		const sanitizedValue = value.replace(/\s/g, '')
+
 		const updatedQueryParams = [...queryParams]
-		updatedQueryParams[index][field] = value
+		updatedQueryParams[index][field] = sanitizedValue
 		setQueryParams(updatedQueryParams)
 	}
 

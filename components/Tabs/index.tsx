@@ -30,7 +30,7 @@ export default function Tabs({ tabs }: { tabs: TabsType[] }) {
 							key={id}
 							className={classNames(
 								'rounded-xl bg-white p-3',
-								'ring-white/60 ring-offset-2 ring-offset-blue-400 focus:outline-none focus:ring-2'
+								'ring-white/60 ring-offset-2 focus:outline-none focus:ring-0 focus:ring-offset-0'
 							)}>
 							<div>{item.component}</div>
 						</Tab.Panel>
