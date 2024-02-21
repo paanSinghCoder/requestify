@@ -14,7 +14,7 @@ import toast from 'react-hot-toast'
 
 export default function Home() {
 	const [method, setMethod] = useState('GET')
-	const [url, setUrl] = useState('')
+	const [url, setUrl] = useState('https://jsonplaceholder.typicode.com/todos/1')
 	const [queryParams, setQueryParams] = useState<QueryParam[]>([{ key: '', value: '' }])
 
 	//JSON input
@@ -36,9 +36,14 @@ export default function Home() {
 			return
 		}
 
+		if (!parsedJson && jsonInput.trim() !== '') {
+			toast.error('Invalid body. Either make it valid or remove it to send a request.')
+			return
+		}
+
 		const queryParamsString = createQueryParamString(queryParams)
 
-		call(url + queryParamsString, method)
+		call(url, method, parsedJson)
 	}
 
 	const tabs: TabsType[] = [
@@ -119,15 +124,18 @@ export default function Home() {
 					</form>
 				</div>
 				<div className="overflow-auto max-h-[650px]">
-					<pre className="w-auto">
-						{res ? (
-							JSON.stringify(res, undefined, 2)
-						) : (
-							<div className="h-full w-full flex items-center justify-center">
-								Start by adding an API URL and hitting Enter
-							</div>
-						)}
-					</pre>
+					{error && <h3 className="text-lg text-red-500">Retry. There was an error</h3>}
+					{!error && (
+						<pre className="w-auto">
+							{res ? (
+								JSON.stringify(res, undefined, 2)
+							) : (
+								<div className="h-full w-full flex items-center justify-center mt-8">
+									Start by adding an API URL and hitting Enter
+								</div>
+							)}
+						</pre>
+					)}
 				</div>
 			</div>
 		</main>
